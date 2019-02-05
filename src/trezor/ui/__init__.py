@@ -197,3 +197,112 @@ class Widget:
             event, *pos = yield touch
             result = self.touch(event, pos)
         return result
+
+
+RENDER = const(-1234)
+
+
+class Control:
+    def dispatch(self, event, x, y):
+        if event == RENDER:
+            self.render()
+        elif event == TOUCH_START:
+            self.touch_start(x, y)
+        elif event == TOUCH_MOVE:
+            self.touch_move(x, y)
+        elif event == TOUCH_END:
+            self.touch_end(x, y)
+
+    def render(self):
+        pass
+
+    def touch_start(self, x, y):
+        pass
+
+    def touch_move(self, x, y):
+        pass
+
+    def touch_end(self, x, y):
+        pass
+
+
+class Container(Control):
+    def __init__(self, children):
+        self.children = children
+
+    def dispatch(self, event, x, y):
+        for child in self.children:
+            child.dispatch(event, x, y)
+        super().dispatch(event, x, y)
+
+
+# button states
+INITIAL = const(0)
+FOCUSED = const(1)
+ACTIVE = const(2)
+# button events
+CLICK = const(1)
+
+
+class Button(Control):
+    def __init__(self, area: tuple, content: str):
+        self.area = area
+        self.content = content
+        self.state = INITIAL
+        self.dirty = True
+
+    def render(self):
+        if self.dirty:
+            ax, ay, aw, ah = self.area
+            self.render_background(ax, ay, aw, ah)
+            self.render_content(ax, ay, aw, ah)
+            self.dirty = False
+
+    def render_background(self, ax, ay, aw, ah):
+        pass
+
+    def render_content(self, ax, ay, aw, ah):
+        pass
+
+    def touch_start(self, event, x, y):
+        if contains(self.area, x, y):
+            self.state = ACTIVE
+            self.dirty = True
+
+    def touch_move(self, event, x, y):
+        if contains(self.area, x, y):
+            if self.state == FOCUSED:
+                self.state = ACTIVE
+                self.dirty = True
+        else:
+            if state == ACTIVE:
+                self.state = FOCUSED
+                self.dirty = True
+
+    def touch_end(self, event, x, y):
+        if self.state != INITIAL:
+            if self.state == ACTIVE and contains(self.area, x, y):
+                self.click(x, y)
+            self.state = INITIAL
+            self.dirty = True
+
+    def click(self, x, y):
+        pass
+
+
+class Confirm(Container):
+    def __init__(self, content):
+        self.confirm = Button(ui.grid(9, n_x=2), "Confirm")
+        self.cancel = Button(ui.grid(8, n_x=2), "Cancel")
+        super().__init__([content, self.confirm, self.cancel])
+
+
+class HoldToConfirm(Container):
+    def __init__(self, content):
+        self.button = Button(ui.grid(4, n_x=1), "Hold To Confirm")
+        self.button.click = self.click
+        self.loader = Loader()
+        super().__init__([content, button, loader])
+
+    def click(self, x, y):
+        pass
