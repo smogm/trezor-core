@@ -199,6 +199,9 @@ class Widget:
         return result
 
 
+# widget-like retained UI, without explicit loop
+
+
 RENDER = const(-1234)
 
 
@@ -266,16 +269,19 @@ class Button(Control):
 
     def touch_start(self, event, x, y):
         if contains(self.area, x, y):
+            self.activate(x, y)
             self.state = ACTIVE
             self.dirty = True
 
     def touch_move(self, event, x, y):
         if contains(self.area, x, y):
             if self.state == FOCUSED:
+                self.activate(x, y)
                 self.state = ACTIVE
                 self.dirty = True
         else:
             if state == ACTIVE:
+                self.deactivate(x, y)
                 self.state = FOCUSED
                 self.dirty = True
 
@@ -285,6 +291,12 @@ class Button(Control):
                 self.click(x, y)
             self.state = INITIAL
             self.dirty = True
+
+    def activate(self, x, y):
+        pass
+
+    def deactivate(self, x, y):
+        pass
 
     def click(self, x, y):
         pass
@@ -300,9 +312,13 @@ class Confirm(Container):
 class HoldToConfirm(Container):
     def __init__(self, content):
         self.button = Button(ui.grid(4, n_x=1), "Hold To Confirm")
-        self.button.click = self.click
+        self.button.activate = self.activate
+        self.button.deactivate = self.deactivate
         self.loader = Loader()
         super().__init__([content, button, loader])
 
-    def click(self, x, y):
-        pass
+    def activate(self, x, y):
+        self.loader.start()
+
+    def deactivate(self, x, y):
+        self.loader.stop()
