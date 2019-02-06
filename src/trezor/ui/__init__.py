@@ -229,20 +229,10 @@ class Control:
         pass
 
 
-class Container(Control):
-    def __init__(self, children):
-        self.children = children
-
-    def dispatch(self, event, x, y):
-        for child in self.children:
-            child.dispatch(event, x, y)
-        super().dispatch(event, x, y)
-
-
 # button states
 INITIAL = const(0)
-FOCUSED = const(1)
-ACTIVE = const(2)
+PRESSED = const(1)
+RELEASED = const(2)
 # button events
 CLICK = const(1)
 
@@ -269,56 +259,97 @@ class Button(Control):
 
     def touch_start(self, event, x, y):
         if contains(self.area, x, y):
-            self.activate(x, y)
-            self.state = ACTIVE
+            self.press_start(x, y)
+            self.state = PRESSED
             self.dirty = True
 
     def touch_move(self, event, x, y):
         if contains(self.area, x, y):
-            if self.state == FOCUSED:
-                self.activate(x, y)
-                self.state = ACTIVE
+            if self.state == RELEASED:
+                self.press_start()
+                self.state = PRESSED
                 self.dirty = True
         else:
-            if state == ACTIVE:
-                self.deactivate(x, y)
-                self.state = FOCUSED
+            if state == PRESSED:
+                self.press_end()
+                self.state = RELEASED
                 self.dirty = True
 
     def touch_end(self, event, x, y):
-        if self.state != INITIAL:
-            if self.state == ACTIVE and contains(self.area, x, y):
+        if contains(self.area, x, y):
+            if self.state == PRESSED:
+                self.press_end()
                 self.click(x, y)
+        if self.state != INITIAL:
             self.state = INITIAL
             self.dirty = True
 
-    def activate(self, x, y):
+    def press_start(self):
         pass
 
-    def deactivate(self, x, y):
+    def press_end(self):
         pass
 
     def click(self, x, y):
         pass
 
 
-class Confirm(Container):
+class Loader(Control):
+    def __init__(self, target_ms=1000):
+        self.target_ms = target_ms
+        self.start_ms = None
+        self.stop_ms = None
+
+    def start(self):
+        self.start_ms = utime.ticks_ms()
+        self.stop_ms = None
+
+    def stop(self):
+        self.stop_ms = utime.ticks_ms()
+
+    def time_since_start(self):
+        if self.start_ms is None:
+            return 0
+        return utime.ticks_ms() - self.start_ms
+
+    def render(self):
+        target = self.target_ms
+        start = self.start_ms
+        stop = self.stop_ms
+        now = utime.ticks_ms()
+        if stop is None:
+            r = min(now - start, target)
+        else:
+            r = max(stop - start + (stop - now) * _SHRINK_BY, 0)
+            if r == 0:
+                self.start_ms = None
+                self.stop_ms = None
+                return
+        # render
+
+
+class Confirm(Control):
     def __init__(self, content):
         self.confirm = Button(ui.grid(9, n_x=2), "Confirm")
         self.cancel = Button(ui.grid(8, n_x=2), "Cancel")
-        super().__init__([content, self.confirm, self.cancel])
+
+    def dispatch(self, event, x, y):
+        self.confirm.dispatch(event, x, y)
+        self.cancel.dispatch(event, x, y)
 
 
-class HoldToConfirm(Container):
+class HoldToConfirm(Control):
     def __init__(self, content):
         self.button = Button(ui.grid(4, n_x=1), "Hold To Confirm")
-        self.button.activate = self.activate
-        self.button.deactivate = self.deactivate
+        self.button.press_start = self.press_start
+        self.button.press_end = self.press_end
         self.loader = Loader()
-        super().__init__([content, button, loader])
 
-    def activate(self, x, y):
+    def press_start(self, x, y):
         self.loader.start()
 
-    def deactivate(self, x, y):
+    def press_end(self, x, y):
         self.loader.stop()
+
+    def dispatch(self, event, x, y):
+        pass
