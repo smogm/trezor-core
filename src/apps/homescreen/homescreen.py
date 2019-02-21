@@ -1,15 +1,33 @@
-from trezor import config, res, ui
+from micropython import const
+
+from trezor import config, log, res, ui
 from trezor.ui.swipe import Swipe, degrees
 
 from apps.common import storage
 
 
 async def homescreen():
-    while True:
-        await ui.backlight_slide(ui.BACKLIGHT_DIM)
-        display_homescreen()
-        await ui.backlight_slide(ui.BACKLIGHT_NORMAL)
-        await swipe_to_rotate()
+    ui.display.backlight(ui.BACKLIGHT_NORMAL)
+
+    try:
+        from trezor.ui.ng.passphrase import PassphraseKeyboard
+        from trezor.ui.ng.mnemonic import MnemonicKeyboard
+        from trezor.ui.ng.confirm import HoldToConfirm
+
+        while True:
+            ui.display.clear()
+            await PassphraseKeyboard("Enter passphrase")
+            await HoldToConfirm(ui.Control())
+            await MnemonicKeyboard()
+
+    except Exception as e:
+        log.exception(__name__, e)
+
+    # while True:
+    #     await ui.backlight_slide(ui.BACKLIGHT_DIM)
+    #     display_homescreen()
+    #     await ui.backlight_slide(ui.BACKLIGHT_NORMAL)
+    #     await swipe_to_rotate()
 
 
 def display_homescreen():

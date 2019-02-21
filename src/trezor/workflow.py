@@ -45,8 +45,8 @@ def restartdefault():
 
 
 def onlayoutstart(l):
-    closedefault()
-    layouts.append(l)
+    # closedefault()
+    # layouts.append(l)
     webauthn_stop_signal.send(None)
 
 
