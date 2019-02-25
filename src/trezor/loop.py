@@ -48,14 +48,18 @@ def pause(task, iface):
     tasks.add(task)
 
 
+def finalize(task, value):
+    fn = _finalizers.pop(id(task), None)
+    if fn is not None:
+        fn(task, value)
+
+
 def close(task):
     for iface in _paused:
         _paused[iface].discard(task)
     _queue.discard(task)
     task.close()
-    fn = _finalizers.pop(id(task), None)
-    if fn is not None:
-        fn(task, GeneratorExit())
+    finalize(task, GeneratorExit())
 
 
 def run():
@@ -99,22 +103,18 @@ def run():
 
 def _step(task, value):
     try:
-        if isinstance(value, Exception):
+        if isinstance(value, BaseException):
             result = task.throw(value)
         else:
             result = task.send(value)
     except StopIteration as e:  # as e:
         if __debug__:
             log.debug(__name__, "finish: %s", task)
-        fn = _finalizers.pop(id(task), None)
-        if fn is not None:
-            fn(task, e.value)
+        finalize(task, e.value)
     except Exception as e:
         if __debug__:
             log.exception(__name__, e)
-        fn = _finalizers.pop(id(task), None)
-        if fn is not None:
-            fn(task, e)
+        finalize(task, e)
     else:
         if isinstance(result, Syscall):
             result.handle(task)

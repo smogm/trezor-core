@@ -1,6 +1,6 @@
 from micropython import const
 
-from trezor import ui
+from trezor import io, loop, ui
 
 SWIPE_UP = const(0x01)
 SWIPE_DOWN = const(0x02)
@@ -25,7 +25,7 @@ def degrees(swipe: int) -> int:
         return 270
 
 
-class Swipe(ui.Layout):
+class Swipe(ui.Control):
     def __init__(self, directions=SWIPE_ALL, area=None, absolute=False):
         if area is None:
             area = (0, 0, ui.WIDTH, ui.HEIGHT)
@@ -119,3 +119,12 @@ class Swipe(ui.Layout):
 
     def on_swipe(self, swipe):
         raise ui.Result(swipe)
+
+    def __iter__(self):
+        try:
+            touch = loop.wait(io.TOUCH)
+            while True:
+                event, x, y = yield touch
+                self.dispatch(event, x, y)
+        except ui.Result as result:
+            return result.value

@@ -168,16 +168,16 @@ class MnemonicKeyboard(ui.Layout):
 
     async def __iter__(self):
         try:
-            spawn_render = self.spawn_render()
-            spawn_input = self.spawn_input()
+            handle_rendering = self.handle_rendering()
+            handle_input = self.handle_input()
             if __debug__:
-                return await loop.spawn(spawn_render, spawn_input, input_signal)
+                return await loop.spawn(handle_rendering, handle_input, input_signal)
             else:
-                return await loop.spawn(spawn_render, spawn_input)
+                return await loop.spawn(handle_rendering, handle_input)
         except ui.Result as result:
             return result.value
 
-    async def spawn_input(self):
+    async def handle_input(self):
         touch = loop.wait(io.TOUCH)
         timeout = loop.sleep(1000 * 1000 * 1)
         spawn_touch = loop.spawn(touch)

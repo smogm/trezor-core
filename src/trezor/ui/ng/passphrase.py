@@ -196,18 +196,14 @@ class PassphraseKeyboard(ui.Layout):
     async def __iter__(self):
         try:
             while True:
-                spawn_render = self.spawn_render()
-                spawn_input = self.spawn_input()
-                spawn_paging = self.spawn_paging()
-                await loop.spawn(spawn_render, spawn_input, spawn_paging)
+                handle_rendering = self.handle_rendering()
+                handle_input = self.handle_input()
+                handle_paging = self.handle_paging()
+                await loop.spawn(handle_rendering, handle_input, handle_paging)
         except ui.Result as result:
             return result.value
 
-    @ui.layout
-    def spawn_render(self):
-        return super().spawn_render()
-
-    async def spawn_input(self):
+    async def handle_input(self):
         touch = loop.wait(io.TOUCH)
         timeout = loop.sleep(1000 * 1000 * 1)
         spawn_touch = loop.spawn(touch)
@@ -226,7 +222,7 @@ class PassphraseKeyboard(ui.Layout):
             else:
                 self.on_timeout()
 
-    async def spawn_paging(self):
+    async def handle_paging(self):
         swipe = await Swipe(SWIPE_HORIZONTAL)
         if swipe == SWIPE_LEFT:
             self.page = (self.page + 1) % len(KEYBOARD_KEYS)

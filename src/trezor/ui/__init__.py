@@ -238,18 +238,18 @@ class Control:
 class Layout(Control):
     async def __iter__(self):
         try:
-            await loop.spawn(self.spawn_render(), self.spawn_input())
+            await loop.spawn(self.handle_rendering(), self.handle_input())
         except Result as result:
             return result.value
 
     @layout
-    def spawn_render(self):
+    def handle_rendering(self):
         sleep = loop.sleep(1000000 // 60)  # 60 fps
         while True:
             self.dispatch(RENDER, 0, 0)
             yield sleep
 
-    def spawn_input(self):
+    def handle_input(self):
         touch = loop.wait(io.TOUCH)
         while True:
             event, x, y = yield touch
