@@ -60,7 +60,7 @@ async def get_keychain(ctx: wire.Context, namespaces: list) -> Keychain:
     return keychain
 
 
-@ui.layout_no_slide
+@ui.layout_without_fade
 async def _compute_seed(ctx: wire.Context) -> bytes:
     passphrase = cache.get_passphrase()
     if passphrase is None:

@@ -116,7 +116,7 @@ class Prompt(ui.Control):
 CANCELLED = const(0)
 
 
-class PassphraseKeyboard(ui.Control):
+class PassphraseKeyboard(ui.Layout):
     def __init__(self, prompt, page=1):
         self.page = page
         self.prompt = Prompt(prompt)
@@ -147,8 +147,10 @@ class PassphraseKeyboard(ui.Control):
             render_scrollbar(self.page)
 
     def on_back_click(self):
-        # Backspace was clicked.  If we have any content in the input, let's
-        # delete the last character.  Otherwise cancel.
+        """
+        Backspace was clicked.  If we have any content in the input, let's delete
+        the last character.  Otherwise cancel.
+        """
         content = self.input.content
         if content:
             self.edit(content[:-1])
@@ -156,25 +158,25 @@ class PassphraseKeyboard(ui.Control):
             self.on_cancel()
 
     def on_key_click(self, button: KeyButton):
-        # Key button was clicked.  If this button is pending, let's cycle the
-        # pending character in input.  If not, let's just append the first
-        # character.
-        text = button.get_text_content()
+        """
+        Key button was clicked.  If this button is pending, let's cycle the
+        pending character in input.  If not, let's just append the first
+        character.
+        """
+        button_text = button.get_text_content()
         if self.pending_button is button:
-            index = (self.pending_index + 1) % len(text)
-            content = self.input.content[:-1] + text[index]
-            pending_button = button
+            index = (self.pending_index + 1) % len(button_text)
+            prefix = self.input.content[:-1]
         else:
             index = 0
-            content = self.input.content + text[0]
-            if len(text) > 1:
-                pending_button = button
-            else:
-                pending_button = None
-        self.edit(content, pending_button, index)
+            prefix = self.input.content
+        if len(button_text) > 1:
+            self.edit(prefix + button_text[index], button, index)
+        else:
+            self.edit(prefix + button_text[index])
 
     def on_timeout(self):
-        # Timeout occurred, let's just reset the pending marker.
+        """Timeout occurred, let's just reset the pending marker."""
         self.edit(self.input.content)
 
     def edit(self, content: str, button: Button = None, index: int = 0):
@@ -201,7 +203,10 @@ class PassphraseKeyboard(ui.Control):
         except ui.Result as result:
             return result.value
 
-    # @ui.layout
+    @ui.layout
+    def spawn_render(self):
+        return super().spawn_render()
+
     async def spawn_input(self):
         touch = loop.wait(io.TOUCH)
         timeout = loop.sleep(1000 * 1000 * 1)
@@ -222,7 +227,7 @@ class PassphraseKeyboard(ui.Control):
                 self.on_timeout()
 
     async def spawn_paging(self):
-        swipe = await Swipe(directions=SWIPE_HORIZONTAL)
+        swipe = await Swipe(SWIPE_HORIZONTAL)
         if swipe == SWIPE_LEFT:
             self.page = (self.page + 1) % len(KEYBOARD_KEYS)
         else:

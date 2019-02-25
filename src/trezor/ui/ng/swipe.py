@@ -25,8 +25,8 @@ def degrees(swipe: int) -> int:
         return 270
 
 
-class Swipe(ui.Control):
-    def __init__(self, area=None, absolute=False, directions=SWIPE_ALL):
+class Swipe(ui.Layout):
+    def __init__(self, directions=SWIPE_ALL, area=None, absolute=False):
         if area is None:
             area = (0, 0, ui.WIDTH, ui.HEIGHT)
         self.area = area

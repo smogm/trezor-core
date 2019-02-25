@@ -7,7 +7,7 @@ CONFIRMED = object()
 CANCELLED = object()
 
 
-class Confirm(ui.Control):
+class Confirm(ui.Layout):
     def __init__(self, content):
         self.content = content
 
@@ -31,7 +31,7 @@ class Confirm(ui.Control):
         raise ui.Result(CANCELLED)
 
 
-class HoldToConfirm(ui.Control):
+class HoldToConfirm(ui.Layout):
     def __init__(self, content):
         self.content = content
         self.loader = Loader()

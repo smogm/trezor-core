@@ -83,7 +83,7 @@ class InputButton(Button):
             display.icon(ix, iy, res.load(i), fg_color, bg_color)
 
 
-class MnemonicKeyboard(ui.Control):
+class MnemonicKeyboard(ui.Layout):
     def __init__(self):
         icon_back = res.load(ui.ICON_BACK)
         self.back = Button(ui.grid(0, n_x=4, n_y=4), icon_back, ButtonClear)

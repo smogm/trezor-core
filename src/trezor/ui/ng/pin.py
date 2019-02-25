@@ -67,7 +67,7 @@ class PinButton(Button):
         self.matrix.assign(self.matrix.input.pin + self.content)
 
 
-class PinDialog(ui.Control):
+class PinDialog(ui.Layout):
     def __init__(self, label, allow_cancel=True, maxlength=9):
         self.maxlength = maxlength
         self.input = PinInput(label, "")

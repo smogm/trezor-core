@@ -117,13 +117,13 @@ def backlight_slide_sync(val: int, delay: int = 35000, step: int = 20):
         utime.sleep_us(delay)
 
 
-def layout(f):
+def layout(fn):
     async def inner(*args, **kwargs):
         await backlight_slide(BACKLIGHT_DIM)
         slide = backlight_slide(BACKLIGHT_NORMAL)
         try:
-            layout = f(*args, **kwargs)
-            workflow.onlayoutstart(layout)
+            layout = fn(*args, **kwargs)
+            # workflow.onlayoutstart(layout)
             loop.schedule(slide)
             display.clear()
             return await layout
@@ -134,10 +134,10 @@ def layout(f):
     return inner
 
 
-def layout_no_slide(f):
+def layout_without_fade(fn):
     async def inner(*args, **kwargs):
         try:
-            layout = f(*args, **kwargs)
+            layout = fn(*args, **kwargs)
             workflow.onlayoutstart(layout)
             return await layout
         finally:
@@ -147,7 +147,7 @@ def layout_no_slide(f):
 
 
 def header(
-    title: str, icon: bytes = ICON_DEFAULT, fg: int = FG, bg: int = BG, ifg: int = GREEN
+    title: str, icon: str = ICON_DEFAULT, fg: int = FG, bg: int = BG, ifg: int = GREEN
 ):
     if icon is not None:
         display.icon(14, 15, res.load(icon), ifg, bg)
@@ -234,12 +234,15 @@ class Control:
     def on_touch_end(self, x, y):
         pass
 
+
+class Layout(Control):
     async def __iter__(self):
         try:
             await loop.spawn(self.spawn_render(), self.spawn_input())
         except Result as result:
             return result.value
 
+    @layout
     def spawn_render(self):
         sleep = loop.sleep(1000000 // 60)  # 60 fps
         while True:
