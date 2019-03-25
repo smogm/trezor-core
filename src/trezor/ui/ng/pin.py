@@ -30,15 +30,15 @@ class PinInput(ui.Control):
     def __init__(self, label, pin):
         self.label = label
         self.pin = pin
-        self.dirty = True
+        self.repaint = True
 
     def on_render(self):
-        if self.dirty:
+        if self.repaint:
             if self.pin:
                 self.render_pin()
             else:
                 self.render_label()
-            self.dirty = False
+            self.repaint = False
 
     def render_pin(self):
         display.bar(0, 0, ui.WIDTH, 45, ui.BG)
@@ -117,7 +117,7 @@ class PinDialog(ui.Layout):
             self.reset_button.disable()
             self.cancel_button.enable()
         self.input.pin = pin
-        self.input.dirty = True
+        self.input.repaint = True
 
     def on_reset(self):
         self.assign("")

@@ -94,30 +94,30 @@ class Button(ui.Control):
         self.active_style = style.active
         self.disabled_style = style.disabled
         self.state = _INITIAL
-        self.dirty = True
+        self.repaint = True
 
     def enable(self):
-        if self.state != _INITIAL:
+        if self.state is not _INITIAL:
             self.state = _INITIAL
-            self.dirty = True
+            self.repaint = True
 
     def disable(self):
-        if self.state != _DISABLED:
+        if self.state is not _DISABLED:
             self.state = _DISABLED
-            self.dirty = True
+            self.repaint = True
 
     def on_render(self):
-        if self.dirty:
-            if self.state == _DISABLED:
+        if self.repaint:
+            if self.state is _DISABLED:
                 s = self.disabled_style
-            elif self.state == _PRESSED:
+            elif self.state is _PRESSED:
                 s = self.active_style
             else:
                 s = self.normal_style
             ax, ay, aw, ah = self.area
             self.render_background(s, ax, ay, aw, ah)
             self.render_content(s, ax, ay, aw, ah)
-            self.dirty = False
+            self.repaint = False
 
     def render_background(self, s, ax, ay, aw, ah):
         radius = s.radius
@@ -149,35 +149,36 @@ class Button(ui.Control):
             display.icon(tx - _ICON // 2, ty - _ICON, t, s.fg_color, s.bg_color)
 
     def on_touch_start(self, x, y):
-        if self.state == _DISABLED:
+        if self.state is _DISABLED:
             return
         if in_area(self.area, x, y):
-            self.on_press_start()
             self.state = _PRESSED
-            self.dirty = True
+            self.repaint = True
+            self.on_press_start()
 
     def on_touch_move(self, x, y):
-        if self.state == _DISABLED:
+        if self.state is _DISABLED:
             return
         if in_area(self.area, x, y):
-            if self.state == _RELEASED:
-                self.on_press_start()
+            if self.state is _RELEASED:
                 self.state = _PRESSED
-                self.dirty = True
+                self.repaint = True
+                self.on_press_start()
         else:
-            if self.state == _PRESSED:
-                self.on_press_end()
+            if self.state is _PRESSED:
                 self.state = _RELEASED
-                self.dirty = True
+                self.repaint = True
+                self.on_press_end()
 
     def on_touch_end(self, x, y):
+        state = self.state
+        if state is not _INITIAL and state is not _DISABLED:
+            self.state = _INITIAL
+            self.repaint = True
         if in_area(self.area, x, y):
-            if self.state == _PRESSED:
+            if state is _PRESSED:
                 self.on_press_end()
                 self.on_click()
-        if self.state != _INITIAL and self.state != _DISABLED:
-            self.state = _INITIAL
-            self.dirty = True
 
     def on_press_start(self):
         pass

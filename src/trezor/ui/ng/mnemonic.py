@@ -38,7 +38,7 @@ class InputButton(Button):
         self.word = word
         self.content = content
         self.pending = pending
-        self.dirty = True
+        self.repaint = True
         if word:
             if content == word:  # confirm button
                 self.enable()

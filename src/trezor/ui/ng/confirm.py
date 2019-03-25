@@ -32,10 +32,11 @@ class Confirm(ui.Layout):
 
 
 class HoldToConfirm(ui.Layout):
-    def __init__(self, content):
+    def __init__(self, content, button_content="Hold To Confirm"):
         self.content = content
         self.loader = Loader()
-        self.button = Button(ui.grid(4, n_x=1), "Hold To Confirm")
+        self.loader.on_start = self._on_loader_start
+        self.button = Button(ui.grid(4, n_x=1), button_content)
         self.button.on_press_start = self._on_press_start
         self.button.on_press_end = self._on_press_end
         self.button.on_click = self._on_click
@@ -46,9 +47,16 @@ class HoldToConfirm(ui.Layout):
     def _on_press_end(self):
         self.loader.stop()
 
+    def _on_loader_start(self):
+        # Loader has either started growing, or returned to the 0-position.
+        # In the first case we need to clear the content leftovers, in the latter
+        # we need to render the content again.
+        ui.display.clear()
+        self.content.dispatch(ui.REPAINT, 0, 0)
+        self.button.dispatch(ui.REPAINT, 0, 0)
+
     def _on_click(self):
-        elapsed = self.loader.ms_since_start()
-        if elapsed >= self.loader.target_ms:
+        if self.loader.elapsed_ms() >= self.loader.target_ms:
             self.on_confirm()
 
     def dispatch(self, event, x, y):

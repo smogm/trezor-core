@@ -10,14 +10,32 @@ async def homescreen():
     ui.display.backlight(ui.BACKLIGHT_NORMAL)
 
     try:
+        from trezor.ui.ng.scroll import Paginated
         from trezor.ui.ng.passphrase import PassphraseKeyboard
         from trezor.ui.ng.mnemonic import MnemonicKeyboard
-        from trezor.ui.ng.confirm import HoldToConfirm
+        from trezor.ui.ng.confirm import HoldToConfirm, Confirm
+        from trezor.ui.ng.text import Text
+
+        text = Text("Header")
+        text.normal("Normal")
+        text.mono("Mono")
+        text.bold("Bold")
+
+        text2 = Text("Page 2")
+        text2.normal("Page 2")
+        text2.mono("Page 2")
+        text2.bold("Page 2")
+
+        text3 = Text("Page 3")
+        text3.normal("Page 3")
+        text3.mono("Page 3")
+        text3.bold("Page 3")
 
         while True:
             ui.display.clear()
+            await Paginated([text, text2, Confirm(text3)])
             await PassphraseKeyboard("Enter passphrase")
-            await HoldToConfirm(ui.Control())
+            await HoldToConfirm(text)
             await MnemonicKeyboard()
 
     except Exception as e:

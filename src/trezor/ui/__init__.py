@@ -207,20 +207,23 @@ def in_area(area, x, y):
     return ax <= x <= ax + aw and ay <= y <= ay + ah
 
 
-# render event
+# render events
 RENDER = const(-1234)
+REPAINT = const(-1235)
 
 
 class Control:
     def dispatch(self, event, x, y):
-        if event == RENDER:
+        if event is RENDER:
             self.on_render()
-        elif event == io.TOUCH_START:
+        elif event is io.TOUCH_START:
             self.on_touch_start(x, y)
-        elif event == io.TOUCH_MOVE:
+        elif event is io.TOUCH_MOVE:
             self.on_touch_move(x, y)
-        elif event == io.TOUCH_END:
+        elif event is io.TOUCH_END:
             self.on_touch_end(x, y)
+        elif event is REPAINT:
+            self.repaint = True
 
     def on_render(self):
         pass

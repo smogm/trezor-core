@@ -13,11 +13,12 @@ class Loader(ui.Control):
     def start(self):
         self.start_ms = utime.ticks_ms()
         self.stop_ms = None
+        self.on_start()
 
     def stop(self):
         self.stop_ms = utime.ticks_ms()
 
-    def ms_since_start(self):
+    def elapsed_ms(self):
         if self.start_ms is None:
             return 0
         return utime.ticks_ms() - self.start_ms
@@ -35,3 +36,7 @@ class Loader(ui.Control):
         if r == 0:
             self.start_ms = None
             self.stop_ms = None
+            self.on_start()
+
+    def on_start(self):
+        pass

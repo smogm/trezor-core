@@ -34,7 +34,7 @@ def render_scrollbar(page):
     y = 44
 
     for i in range(0, page_count):
-        if i != page:
+        if i is not page:
             ui.display.bar_radius(
                 x + i * padding, y, size, size, ui.DARK_GREY, ui.BG, size // 2
             )
@@ -113,7 +113,7 @@ class Prompt(ui.Control):
             self.dirty = False
 
 
-CANCELLED = const(0)
+CANCELLED = object()
 
 
 class PassphraseKeyboard(ui.Layout):
@@ -229,13 +229,13 @@ class PassphraseKeyboard(ui.Layout):
         else:
             self.page = (self.page - 1) % len(KEYBOARD_KEYS)
         self.keys = key_buttons(KEYBOARD_KEYS[self.page], self)
-        self.back.dirty = True
-        self.done.dirty = True
-        self.input.dirty = True
-        self.prompt.dirty = True
+        self.back.repaint = True
+        self.done.repaint = True
+        self.input.repaint = True
+        self.prompt.repaint = True
 
     def on_cancel(self):
-        pass
+        raise ui.Result(CANCELLED)
 
     def on_confirm(self):
-        pass
+        raise ui.Result(self.input.content)
