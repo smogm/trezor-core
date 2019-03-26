@@ -69,7 +69,7 @@ class Input(Button):
     def edit(self, content, pending):
         self.content = content
         self.pending = pending
-        self.dirty = True
+        self.repaint = True
 
     def render_content(self, s, ax, ay, aw, ah):
         text_style = s.text_style
@@ -104,13 +104,13 @@ class Input(Button):
 class Prompt(ui.Control):
     def __init__(self, text):
         self.text = text
-        self.dirty = True
+        self.repaint = True
 
     def on_render(self):
-        if self.dirty:
+        if self.repaint:
             display.bar(0, 0, ui.WIDTH, 48, ui.BG)
             display.text_center(ui.WIDTH // 2, 32, self.text, ui.BOLD, ui.GREY, ui.BG)
-            self.dirty = False
+            self.repaint = False
 
 
 CANCELLED = object()
@@ -191,7 +191,7 @@ class PassphraseKeyboard(ui.Layout):
             self.back.enable()
         else:
             self.back.disable()
-            self.prompt.dirty = True
+            self.prompt.repaint = True
 
     async def __iter__(self):
         try:

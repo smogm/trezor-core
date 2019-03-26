@@ -247,7 +247,7 @@ class Layout(Control):
 
     @layout
     def handle_rendering(self):
-        sleep = loop.sleep(1000000 // 60)  # 60 fps
+        sleep = loop.sleep(10000)
         while True:
             self.dispatch(RENDER, 0, 0)
             yield sleep
