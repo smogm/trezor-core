@@ -166,17 +166,6 @@ class MnemonicKeyboard(ui.Layout):
             else:
                 btn.disable()
 
-    async def __iter__(self):
-        try:
-            handle_rendering = self.handle_rendering()
-            handle_input = self.handle_input()
-            if __debug__:
-                return await loop.spawn(handle_rendering, handle_input, input_signal)
-            else:
-                return await loop.spawn(handle_rendering, handle_input)
-        except ui.Result as result:
-            return result.value
-
     async def handle_input(self):
         touch = loop.wait(io.TOUCH)
         timeout = loop.sleep(1000 * 1000 * 1)
@@ -195,3 +184,14 @@ class MnemonicKeyboard(ui.Layout):
                 self.dispatch(event, x, y)
             else:
                 self.on_timeout()
+
+    async def __iter__(self):
+        try:
+            handle_rendering = self.handle_rendering()
+            handle_input = self.handle_input()
+            if __debug__:
+                return await loop.spawn(handle_rendering, handle_input, input_signal)
+            else:
+                return await loop.spawn(handle_rendering, handle_input)
+        except ui.Result as result:
+            return result.value

@@ -193,16 +193,6 @@ class PassphraseKeyboard(ui.Layout):
             self.back.disable()
             self.prompt.repaint = True
 
-    async def __iter__(self):
-        try:
-            while True:
-                handle_rendering = self.handle_rendering()
-                handle_input = self.handle_input()
-                handle_paging = self.handle_paging()
-                await loop.spawn(handle_rendering, handle_input, handle_paging)
-        except ui.Result as result:
-            return result.value
-
     async def handle_input(self):
         touch = loop.wait(io.TOUCH)
         timeout = loop.sleep(1000 * 1000 * 1)
@@ -239,3 +229,13 @@ class PassphraseKeyboard(ui.Layout):
 
     def on_confirm(self):
         raise ui.Result(self.input.content)
+
+    async def __iter__(self):
+        try:
+            while True:
+                handle_rendering = self.handle_rendering()
+                handle_input = self.handle_input()
+                handle_paging = self.handle_paging()
+                await loop.spawn(handle_rendering, handle_input, handle_paging)
+        except ui.Result as result:
+            return result.value

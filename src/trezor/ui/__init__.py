@@ -239,15 +239,9 @@ class Control:
 
 
 class Layout(Control):
-    async def __iter__(self):
-        try:
-            await loop.spawn(self.handle_rendering(), self.handle_input())
-        except Result as result:
-            return result.value
-
     @layout
     def handle_rendering(self):
-        sleep = loop.sleep(10000)
+        sleep = loop.sleep(10000)  # 10 msec
         while True:
             self.dispatch(RENDER, 0, 0)
             yield sleep
@@ -257,6 +251,12 @@ class Layout(Control):
         while True:
             event, x, y = yield touch
             self.dispatch(event, x, y)
+
+    async def __iter__(self):
+        try:
+            await loop.spawn(self.handle_rendering(), self.handle_input())
+        except Result as result:
+            return result.value
 
 
 class Result(Exception):
