@@ -1,12 +1,37 @@
 import utime
+from micropython import const
 
-from trezor import ui
+from trezor import res, ui
 from trezor.ui import display
 
 
+class LoaderDefault:
+    class normal:
+        bg_color = ui.BG
+        fg_color = ui.GREEN
+        icon = None
+        icon_fg_color = None
+
+    class active:
+        bg_color = ui.BG
+        fg_color = ui.GREEN
+        icon = ui.ICON_CHECK
+        icon_fg_color = ui.WHITE
+
+
+class LoaderDanger:
+    class normal(LoaderDefault.normal):
+        fg_color = ui.RED
+
+    class active(LoaderDefault.active):
+        fg_color = ui.RED
+
+
 class Loader(ui.Control):
-    def __init__(self, target_ms=1000):
+    def __init__(self, target_ms=1000, style=LoaderDefault):
         self.target_ms = target_ms
+        self.normal_style = style.normal
+        self.active_style = style.active
         self.start_ms = None
         self.stop_ms = None
 
@@ -32,7 +57,19 @@ class Loader(ui.Control):
             r = min(now - start, target)
         else:
             r = max(stop - start + (stop - now) * 2, 0)
-        display.loader(r, -24, ui.FG, ui.BG)
+        if r == target:
+            s = self.active_style
+        else:
+            s = self.normal_style
+
+        Y = const(-24)
+
+        if s.icon is None:
+            display.loader(r, Y, s.fg_color, s.bg_color)
+        else:
+            display.loader(
+                r, Y, s.fg_color, s.bg_color, res.load(s.icon), s.icon_fg_color
+            )
         if r == 0:
             self.start_ms = None
             self.stop_ms = None

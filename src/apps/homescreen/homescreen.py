@@ -33,9 +33,9 @@ async def homescreen():
 
         while True:
             ui.display.clear()
+            await HoldToConfirm(text)
             await Paginated([text, text2, Confirm(text3)])
             await PassphraseKeyboard("Enter passphrase")
-            await HoldToConfirm(text)
             await MnemonicKeyboard()
 
     except Exception as e:
