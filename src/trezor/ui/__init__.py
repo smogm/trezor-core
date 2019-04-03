@@ -254,7 +254,7 @@ class Layout(Control):
 
     async def __iter__(self):
         try:
-            await loop.spawn(self.handle_rendering(), self.handle_input())
+            await loop.spawn(self.handle_input(), self.handle_rendering())
         except Result as result:
             return result.value
 
