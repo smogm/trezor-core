@@ -27,8 +27,8 @@ def generate_digits():
 
 
 class PinInput(ui.Control):
-    def __init__(self, label, pin):
-        self.label = label
+    def __init__(self, prompt, pin):
+        self.prompt = prompt
         self.pin = pin
         self.repaint = True
 
@@ -37,7 +37,7 @@ class PinInput(ui.Control):
             if self.pin:
                 self.render_pin()
             else:
-                self.render_label()
+                self.render_prompt()
             self.repaint = False
 
     def render_pin(self):
@@ -53,9 +53,9 @@ class PinInput(ui.Control):
                 render_x + i * padding, render_y, dot_size, dot_size, ui.GREY, ui.BG, 4
             )
 
-    def render_label(self):
+    def render_prompt(self):
         display.bar(0, 0, ui.WIDTH, 45, ui.BG)
-        display.text_center(ui.WIDTH // 2, 36, self.label, ui.BOLD, ui.GREY, ui.BG)
+        display.text_center(ui.WIDTH // 2, 36, self.prompt, ui.BOLD, ui.GREY, ui.BG)
 
 
 class PinButton(Button):
@@ -67,10 +67,13 @@ class PinButton(Button):
         self.matrix.assign(self.matrix.input.pin + self.content)
 
 
+CANCELLED = object()
+
+
 class PinDialog(ui.Layout):
-    def __init__(self, label, allow_cancel=True, maxlength=9):
+    def __init__(self, prompt, allow_cancel=True, maxlength=9):
         self.maxlength = maxlength
-        self.input = PinInput(label, "")
+        self.input = PinInput(prompt, "")
 
         icon_confirm = res.load(ui.ICON_CONFIRM)
         self.confirm_button = Button(ui.grid(14), icon_confirm, ButtonConfirm)
@@ -123,7 +126,7 @@ class PinDialog(ui.Layout):
         self.assign("")
 
     def on_cancel(self):
-        pass
+        raise ui.Result(CANCELLED)
 
     def on_confirm(self):
-        pass
+        raise ui.Result(self.input.pin)

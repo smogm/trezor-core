@@ -10,6 +10,7 @@ async def homescreen():
     ui.display.backlight(ui.BACKLIGHT_NORMAL)
 
     try:
+        from trezor.ui.ng.pin import PinDialog
         from trezor.ui.ng.scroll import Paginated
         from trezor.ui.ng.passphrase import PassphraseKeyboard
         from trezor.ui.ng.mnemonic import MnemonicKeyboard
@@ -33,10 +34,11 @@ async def homescreen():
 
         while True:
             ui.display.clear()
+            await MnemonicKeyboard("Enter the 1st word")
+            await PinDialog("Change PIN")
             await HoldToConfirm(text)
             await Paginated([text, text2, Confirm(text3)])
             await PassphraseKeyboard("Enter passphrase")
-            await MnemonicKeyboard()
 
     except Exception as e:
         log.exception(__name__, e)

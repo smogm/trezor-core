@@ -64,6 +64,11 @@ class InputButton(Button):
         w = self.word[len(t) :]  # suggested word
         i = self.icon  # rendered icon
 
+        if not t:
+            # render prompt
+            display.text(20, 40, self.prompt, ui.BOLD, ui.GREY, ui.BG)
+            return
+
         tx = ax + 24  # x-offset of the content
         ty = ay + ah // 2 + 8  # y-offset of the content
 
@@ -83,8 +88,19 @@ class InputButton(Button):
             display.icon(ix, iy, res.load(i), fg_color, bg_color)
 
 
+class Prompt(ui.Control):
+    def __init__(self, prompt):
+        self.prompt = prompt
+
+    def on_render(self):
+        display.bar(0, 8, ui.WIDTH, 60, ui.BG)
+        display.text(20, 40, self.prompt, ui.BOLD, ui.GREY, ui.BG)
+
+
 class MnemonicKeyboard(ui.Layout):
-    def __init__(self):
+    def __init__(self, prompt):
+        self.prompt = Prompt(prompt)
+
         icon_back = res.load(ui.ICON_BACK)
         self.back = Button(ui.grid(0, n_x=4, n_y=4), icon_back, ButtonClear)
         self.back.on_click = self.on_back_click
@@ -104,8 +120,11 @@ class MnemonicKeyboard(ui.Layout):
     def dispatch(self, event: int, x: int, y: int):
         for btn in self.keys:
             btn.dispatch(event, x, y)
-        self.back.dispatch(event, x, y)
-        self.input.dispatch(event, x, y)
+        if self.input.content:
+            self.input.dispatch(event, x, y)
+            self.back.dispatch(event, x, y)
+        else:
+            self.prompt.dispatch(event, x, y)
 
     def on_back_click(self):
         # Backspace was clicked, let's delete the last character of input.

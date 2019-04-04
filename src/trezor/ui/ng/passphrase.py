@@ -125,6 +125,7 @@ class PassphraseKeyboard(ui.Layout):
 
         self.back = Button(ui.grid(12), res.load(ui.ICON_BACK), ButtonClear)
         self.back.on_click = self.on_back_click
+        self.back.disable()
 
         self.done = Button(ui.grid(14), res.load(ui.ICON_CONFIRM), ButtonConfirm)
         self.done.on_click = self.on_confirm
