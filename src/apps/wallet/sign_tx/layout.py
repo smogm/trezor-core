@@ -8,9 +8,15 @@ from trezor.utils import chunks, format_amount
 from apps.common.confirm import confirm, hold_to_confirm
 from apps.wallet.sign_tx import addresses, omni
 
+# from datetime import datetime
+
 
 def format_coin_amount(amount, coin):
     return "%s %s" % (format_amount(amount, 8), coin.coin_shortcut)
+
+
+# def format_locktime(lock_time):
+#     return datetime.utcfromtimestamp(lock_time).strftime('%Y-%m-%d %H:%M:%S')
 
 
 def split_address(address):
@@ -64,4 +70,17 @@ async def confirm_feeoverthreshold(ctx, fee, coin):
 async def confirm_foreign_address(ctx, address_n, coin):
     text = Text("Confirm sending", ui.ICON_SEND, icon_color=ui.RED)
     text.normal("Trying to spend", "coins from another chain.", "Continue?")
+    return await confirm(ctx, text, ButtonRequestType.SignTx)
+
+
+async def confirm_nondefault_locktime(ctx, lock_time):
+    text = Text("Confirm locktime", ui.ICON_SEND, icon_color=ui.GREEN)
+    if lock_time < 500000000:
+        text.normal("Blockheight for this", "transaction is:")
+        text.bold(str(lock_time))
+        text.normal("Continue?")
+    else:
+        text.normal("Locktime for this", "transaction is:")
+        text.bold(str(lock_time))
+        text.normal("Continue?")
     return await confirm(ctx, text, ButtonRequestType.SignTx)
