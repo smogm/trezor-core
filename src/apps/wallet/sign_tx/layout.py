@@ -8,15 +8,9 @@ from trezor.utils import chunks, format_amount
 from apps.common.confirm import confirm, hold_to_confirm
 from apps.wallet.sign_tx import addresses, omni
 
-# from datetime import datetime
-
 
 def format_coin_amount(amount, coin):
     return "%s %s" % (format_amount(amount, 8), coin.coin_shortcut)
-
-
-# def format_locktime(lock_time):
-#     return datetime.utcfromtimestamp(lock_time).strftime('%Y-%m-%d %H:%M:%S')
 
 
 def split_address(address):
