@@ -1,4 +1,6 @@
+import sys, utime
 from ubinascii import hexlify
+from micropython import const
 
 from trezor import ui
 from trezor.messages import ButtonRequestType, OutputScriptType
@@ -8,10 +10,22 @@ from trezor.utils import chunks, format_amount
 from apps.common.confirm import confirm, hold_to_confirm
 from apps.wallet.sign_tx import addresses, omni
 
+# embedded ports of micropython start their epoch 1.1.2000
+# see https://docs.micropython.org/en/latest/library/utime.html
+_EMBEDDED_TIMESTAMP_DIFF = const(946684800)
+
 
 def format_coin_amount(amount, coin):
     return "%s %s" % (format_amount(amount, 8), coin.coin_shortcut)
 
+def convert_to_embedded_timestamp(unix_timestamp):
+    return unix_timestamp-_EMBEDDED_TIMESTAMP_DIFF
+
+def format_date(timestamp):
+    if sys.platform != "unix":
+        timestamp = convert_to_embedded_timestamp(timestamp)
+
+    return utime.localtime(timestamp)   
 
 def split_address(address):
     return chunks(address, 17)
@@ -75,6 +89,6 @@ async def confirm_nondefault_locktime(ctx, lock_time):
         text.normal("Continue?")
     else:
         text.normal("Locktime for this", "transaction is:")
-        text.bold(str(lock_time))
+        text.bold(format_date(lock_time))
         text.normal("Continue?")
     return await confirm(ctx, text, ButtonRequestType.SignTx)
