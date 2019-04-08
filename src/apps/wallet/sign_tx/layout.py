@@ -19,13 +19,14 @@ def format_coin_amount(amount, coin):
     return "%s %s" % (format_amount(amount, 8), coin.coin_shortcut)
 
 def convert_to_embedded_timestamp(unix_timestamp):
-    return unix_timestamp-_EMBEDDED_TIMESTAMP_DIFF
+    return max(0, unix_timestamp-_EMBEDDED_TIMESTAMP_DIFF)
 
+# dates before 1.1.2000 will resolve to 1.1.2000 on non-unix
 def format_date(timestamp):
-    if sys.platform != "unix":
+    if not sys.platform.equals("unix"):
         timestamp = convert_to_embedded_timestamp(timestamp)
 
-    return utime.localtime(timestamp)   
+    return utime.localtime(timestamp)
 
 def split_address(address):
     return chunks(address, 17)
