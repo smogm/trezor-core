@@ -1,6 +1,7 @@
-import sys, utime
-from ubinascii import hexlify
+import sys
+import utime
 from micropython import const
+from ubinascii import hexlify
 
 from trezor import ui
 from trezor.messages import ButtonRequestType, OutputScriptType
@@ -18,8 +19,10 @@ _EMBEDDED_TIMESTAMP_DIFF = const(946684800)
 def format_coin_amount(amount, coin):
     return "%s %s" % (format_amount(amount, 8), coin.coin_shortcut)
 
+
 def convert_to_embedded_timestamp(unix_timestamp):
-    return max(0, unix_timestamp-_EMBEDDED_TIMESTAMP_DIFF)
+    return max(0, unix_timestamp - _EMBEDDED_TIMESTAMP_DIFF)
+
 
 # dates before 1.1.2000 will resolve to 1.1.2000 on non-unix
 def format_date(timestamp):
@@ -27,6 +30,7 @@ def format_date(timestamp):
         timestamp = convert_to_embedded_timestamp(timestamp)
 
     return utime.localtime(timestamp)
+
 
 def split_address(address):
     return chunks(address, 17)
